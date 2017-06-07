@@ -6,7 +6,7 @@
 #define INTERACTIONLEAPMOTION_OBJECT3D_H
 
 
-class object3D {
+class Object3D {
     double **points; //Coordenadas x, y, z de cada ponto
     int **lines; //Indice do primeiro e ultimo ponto da linha
     int* trans; // Coordenadas x, y e z para projecao no sist de referencia do universo
@@ -14,19 +14,19 @@ class object3D {
     float* scale; //Escala do objeto, x, y e z
     int p, l; //qnt de pontos e linhas
 public:
-    object3D(int,int);
+    Object3D();
+    Object3D(int,int);
     void cleanObject();
     void makeCube();
     void printObjectInfo();
-    object3D copyObject ();
+    Object3D copyObject ();
     void matrixMult (double (*mtr)[4]);
-//    void matrixSum (graphObject* obj, int mtr[3]);
     void rotateX( float angle);
     void rotateY( float angle);
     void rotateZ( float angle);
-    void scaleX(float scale);
-    void scaleY(float scale);
-    void scaleZ(float scale);
+    void scaleX(double scale);
+    void scaleY(double scale);
+    void scaleZ(double scale);
     void transX(int trans);
     void transY(int trans);
     void transZ(int trans);
@@ -38,6 +38,12 @@ public:
     void persp1_proj ();
     void persp2_proj ();
     void showLinesCube ();
+
+    void addTransY(int i);
+
+    void addTransX(int i);
+
+    void addTransZ(int i);
 };
 
 #endif //INTERACTIONLEAPMOTION_OBJECT3D_H

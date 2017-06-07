@@ -13,14 +13,21 @@
 
 double GTOR = PI / 180;
 
-object3D::object3D(int n_points, int m_lines) {
+Object3D::Object3D() {
+
+}
+
+Object3D::Object3D(int n_points, int m_lines) {
     p = n_points;
     l = m_lines;
 
     // Init arrays de informações
     scale = new float[3];
+    std::fill(&scale[0],&scale[3],0);
     ang = new int[3];
+    std::fill(&ang[0],&ang[3],0);
     trans = new int[3];
+    std::fill(&trans[0],&trans[3],0);
 
     // Init Matriz de pontos
     points = new double *[n_points];
@@ -35,8 +42,8 @@ object3D::object3D(int n_points, int m_lines) {
     }
 };
 
-object3D object3D::copyObject() {
-    object3D copy(p,l);
+Object3D Object3D::copyObject() {
+    Object3D copy(p,l);
     for (size_t j = 0; j < copy.p; j++) {
         for (size_t i = 0; i < qnt_coord; i++) {
             copy.points[j][i] = points[j][i];
@@ -47,10 +54,20 @@ object3D object3D::copyObject() {
             copy.lines[j][i] = lines[j][i];
         }
     }
+    for (int i = 0; i < 3; ++i) {
+        copy.trans[i] = trans[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+        copy.ang[i] = ang[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+        copy.scale[i] = scale[i];
+    }
+
     return copy;
 }
 
-void object3D::cleanObject() {
+void Object3D::cleanObject() {
     for (int i = 0; i < p; ++i)
         delete[] points[i];
     delete[] points;
@@ -64,28 +81,30 @@ void object3D::cleanObject() {
     delete[] trans;
 }
 
-void object3D::printObjectInfo(){
+void Object3D::printObjectInfo(){
     printf("\n##########################\n");
     printf("Quantidade de pontos: %d\n",p);
     printf("Quantidade de linhas: %d\n",l);
-    printf("Angulos rotacionados em x, y e z:\n");
+    printf("\nAngulos rotacionados em x, y e z:\n");
     for (int i = 0; i < 3; ++i)
-        std::cout << ang[i];
-    printf("Valores transladados em x, y e z:\n");
+        std::cout << ang[i] << " ";
+    printf("\nValores transladados em x, y e z:\n");
     for (int i = 0; i < 3; ++i)
-        std::cout << trans[i];
-    printf("Valores escalados em x, y e z:\n");
+        std::cout << trans[i] << " ";
+    printf("\nValores escalados em x, y e z:\n");
     for (int i = 0; i < 3; ++i)
-        std::cout << scale[i];
-    printf("Matriz de pontos:\n");
-    for (int i = 0; i < p*qnt_coord; i++)
-        std::cout << points[i];
-    printf("Matriz de linhas:\n");
-    for (int i = 0; i < l*qnt_points; i++)
-        std::cout << lines[i];
+        std::cout << scale[i] << " ";
+    printf("\nMatriz de pontos:\n");
+    for (int i = 0; i < p; ++i)
+        for (int j = 0; j < qnt_coord; ++j)
+            std::cout << points[i][j] << " ";
+    printf("\nMatriz de linhas:\n");
+    for (int i = 0; i < l; ++i)
+        for (int j = 0; j < qnt_points; ++j)
+            std::cout << lines[i][j] << " ";
 }
 
-void object3D::makeCube() {
+void Object3D::makeCube() {
     points[0][0] =  1.0; points[0][1] =  1.0; points[0][2] =  1.0; points[0][3] = 1.0;//p3
     points[1][0] =  1.0; points[1][1] =  1.0; points[1][2] = -1.0; points[1][3] = 1.0;//p6
     points[2][0] =  1.0; points[2][1] = -1.0; points[2][2] =  1.0; points[2][3] = 1.0;//p2
@@ -112,7 +131,7 @@ void object3D::makeCube() {
     lines[11][0] = 6; lines[11][1] = 7;
 }
 
-void object3D::matrixMult(double (*mtr)[4]) {
+void Object3D::matrixMult(double (*mtr)[4]) {
     double x, y, z, m;
     for (size_t i = 0; i < p; i++) {
         x = points[i][0];
@@ -126,7 +145,7 @@ void object3D::matrixMult(double (*mtr)[4]) {
     }
 }
 
-void object3D::rotateX(float angle) {
+void Object3D::rotateX(float angle) {
     ang[0] += angle;
     double rotateMtr[4][4] = {1, 0, 0, 0,
                               0, cos(angle * GTOR), sin(angle * GTOR), 0,
@@ -135,8 +154,7 @@ void object3D::rotateX(float angle) {
     matrixMult(rotateMtr);
 }
 
-
-void object3D::rotateY(float angle) {
+void Object3D::rotateY(float angle) {
     ang[1] += angle;
     double rotateMtr[4][4] = {cos(angle * GTOR), 0, sin(angle * GTOR) * -1, 0,
                               0, 1, 0, 0,
@@ -145,7 +163,7 @@ void object3D::rotateY(float angle) {
     matrixMult(rotateMtr);
 }
 
-void object3D::rotateZ(float angle) {
+void Object3D::rotateZ(float angle) {
     ang[2] += angle;
     double rotateMtr[4][4] = {cos(angle * GTOR), sin(angle * GTOR), 0, 0,
                              sin(angle * GTOR) * -1, cos(angle * GTOR), 0, 0,
@@ -154,7 +172,7 @@ void object3D::rotateZ(float angle) {
     matrixMult(rotateMtr);
 }
 
-void object3D::scaleX(float scale) {
+void Object3D::scaleX(double scale) {
     this->scale[0] += scale;
     double scaleMtr[4][4] = {scale, 0, 0, 0,
                              0, 1, 0, 0,
@@ -163,7 +181,7 @@ void object3D::scaleX(float scale) {
     matrixMult(scaleMtr);
 }
 
-void object3D::scaleY(float scale) {
+void Object3D::scaleY(double scale) {
     this->scale[1] += scale;
     double scaleMtr[4][4] = {1, 0, 0, 0,
                              0, scale, 0, 0,
@@ -172,7 +190,7 @@ void object3D::scaleY(float scale) {
     matrixMult(scaleMtr);
 }
 
-void object3D::scaleZ(float scale) {
+void Object3D::scaleZ(double scale) {
     this->scale[2] += scale;
     double scaleMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
@@ -181,8 +199,20 @@ void object3D::scaleZ(float scale) {
     matrixMult(scaleMtr);
 }
 
-void object3D::transX(int trans) {
-    this->trans[0] += trans;
+void Object3D::addTransX(int i) {
+    this->trans[0] += i;
+}
+
+void Object3D::addTransY(int i) {
+    this->trans[1] += i;
+}
+
+void Object3D::addTransZ(int i) {
+    this->trans[2] += i;
+}
+
+void Object3D::transX(int trans) {
+    trans += this->trans[0];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
                              0, 0, 1, 0,
@@ -190,8 +220,8 @@ void object3D::transX(int trans) {
     matrixMult(transMtr);
 }
 
-void object3D::transY(int trans) {
-    this->trans[1] += trans;
+void Object3D::transY(int trans) {
+    trans += this->trans[1];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
                              0, 0, 1, 0,
@@ -199,8 +229,8 @@ void object3D::transY(int trans) {
     matrixMult(transMtr);
 }
 
-void object3D::transZ(int trans) {
-    this->trans[2] += trans;
+void Object3D::transZ(int trans) {
+    trans += this->trans[2];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
                              0, 0, 1, 0,
@@ -208,18 +238,18 @@ void object3D::transZ(int trans) {
     matrixMult(transMtr);
 }
 
-void object3D::scaleObject(float scale){
+void Object3D::scaleObject(float scale){
     scaleX(scale);
     scaleY(scale);
     scaleZ(scale);
 }
 
-void object3D::moveCenter(int center){
+void Object3D::moveCenter(int center){
     transX(center);
     transY(center);
 }
 
-void object3D::cavaleira_proj() {
+void Object3D::cavaleira_proj() {
     float alfa = 0.707;
     double cavMtr[4][4] = {1, 0, 0, 0,
                           0, 1, 0, 0,
@@ -228,7 +258,7 @@ void object3D::cavaleira_proj() {
     matrixMult(cavMtr);
 }
 
-void object3D::cabinet_proj() {
+void Object3D::cabinet_proj() {
     double alfa = 0.707 / 2;
     double cabMtr[4][4] = {1, 0, 0, 0,
                           0, 1, 0, 0,
@@ -237,7 +267,7 @@ void object3D::cabinet_proj() {
     matrixMult(cabMtr);
 }
 
-void object3D::orto_proj() {
+void Object3D::orto_proj() {
     double ortoMtr[4][4] = {1, 0, 0, 0,
                            0, 1, 0, 0,
                            0, 0, 0, 0,
@@ -245,7 +275,7 @@ void object3D::orto_proj() {
     matrixMult(ortoMtr);
 }
 
-void object3D::persp1_proj() {
+void Object3D::persp1_proj() {
     double fz = -100.0;
     double perspMtr[4][4] = {1, 0, 0, 0,
                             0, 1, 0, 0,
@@ -254,7 +284,7 @@ void object3D::persp1_proj() {
     matrixMult(perspMtr);
 }
 
-void object3D::persp2_proj() {
+void Object3D::persp2_proj() {
     double fz = -100.0;
     double fx = -100.0;
     double perspMtr[4][4] = {1, 0, 0, -1 / fx,
@@ -264,17 +294,18 @@ void object3D::persp2_proj() {
     matrixMult(perspMtr);
 }
 
-void object3D::showLinesCube(){
+void Object3D::showLinesCube(){
     double x1, y1, x2, y2;
-    int idColor = 1;
     for (size_t j = 0; j < l; j++) {
         x1 = (points[ lines[j][0] ][0])/points[ lines[j][0] ][3];
         y1 = (points[ lines[j][0] ][1])/points[ lines[j][0] ][3];
         x2 = (points[ lines[j][1] ][0])/points[ lines[j][1] ][3];
         y2 = (points[ lines[j][1] ][1])/points[ lines[j][1] ][3];
-        Window::createLine(x1,y1,x2,y2,idColor);
+        Window::createLine(x1,y1,x2,y2);
     }
 }
+
+
 
 
 

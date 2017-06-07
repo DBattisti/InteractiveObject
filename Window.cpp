@@ -4,28 +4,21 @@
 
 #include <GL/glut.h>
 #include <math.h>
-#include <algorithm>
 #include "Window.h"
 
 Window::Window(int height, int width) {
     this->width = width;
     this->height = height;
-
-    points_mtr = new int *[height];
-    for (int i = 0; i < height; i++) {
-        points_mtr[i] = new int[width];
-    }
-    std::fill(points_mtr[0], points_mtr[0] + width * height, 0);
 }
 
 void Window::putPixel(double x, double y) {
-    glPointSize(2);
+    glPointSize(1.5);
     glBegin(GL_POINTS);
     glVertex2f((GLfloat) round(x), (GLfloat) round(y));
     glEnd();
 }
 
-void Window::createLine(double x1, double y1, double x2, double y2, int idColor) {
+void Window::createLine(double x1, double y1, double x2, double y2) {
     double x = 0, y = 0;
     double dx = x2 - x1, dy = y2 - y1;
     double xmax = fmax(x1, x2), ymax = fmax(y1, y2);

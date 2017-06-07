@@ -1,12 +1,14 @@
 #include <GL/glut.h>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 #include "Object3D.h"
 #include "Window.h"
 
 #define ANGLE_SPEED 5
 #define SCALE_SPEED 1.1
 #define TRANS_SPEED 5
-#define WIDTH 600
+#define WIDTH 800
 #define HEIGHT 600
 
 enum MENU_TYPE{
@@ -22,21 +24,26 @@ enum MENU_TYPE{
 
 int funcProj;
 int win, main_menu, proj_menu;
+int current;
 
-object3D orig (8,12);
-object3D copy (8,12);
+std::vector<Object3D> objects(5);
 Window pri (WIDTH,HEIGHT);
 
 void setup(){
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     gluOrtho2D(0, WIDTH-1, 0, HEIGHT-1);
-    orig.makeCube();
-    orig.scaleObject(50.0);
+    std::vector<Object3D>::iterator it;
+    for (it = objects.begin(); it != objects.end() ; ++it) {
+        (*it) = Object3D(8,12);
+        (*it).makeCube();
+        (*it).scaleObject(50.0);
+    }
+    current = 0;
     funcProj = MENU_CAVALEIRA;
 }
 
-void proj (){
-    copy = orig.copyObject();
+void proj (Object3D orig){
+    Object3D copy = orig.copyObject();
     switch (funcProj) {
         case MENU_CAVALEIRA:
             copy.cavaleira_proj();
@@ -63,15 +70,12 @@ void proj (){
     copy.cleanObject();
 }
 
-void display()
-{
+void display(){
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0f, 0.0f, 0.0f);
-
-    Window::createLine(300.0,0.0,300.0,600.0,2);
-    Window::createLine(0.0,300.0,600.0,300.0,2);
-
-    proj();
+    for (std::vector<Object3D>::iterator it = objects.begin(); it != objects.end() ; ++it) {
+        proj((*it));
+    }
     glutSwapBuffers();
 }
 
@@ -89,7 +93,7 @@ void choose (int item_menu){
             glutPostRedisplay();
             break;
         case MENU_PRINT:
-            orig.printObjectInfo();
+            objects[current].printObjectInfo();
             break;
         default:
             printf("Invalid menu item:%d\n", item_menu);
@@ -98,63 +102,67 @@ void choose (int item_menu){
 
 void transformations (unsigned char key,int x, int y){
     switch (key) {
+        case 'q':
+            current ++;
+            current %= 5;
         // Rotacionar
         case 'z':
-            orig.rotateX(ANGLE_SPEED);
+            objects[current].rotateX(ANGLE_SPEED);
             break;
         case 'x':
-            orig.rotateY(ANGLE_SPEED);
+            objects[current].rotateY(ANGLE_SPEED);
             break;
         case 'c':
-            orig.rotateZ(ANGLE_SPEED);
+            objects[current].rotateZ(ANGLE_SPEED);
             break;
         case 'a':
-            orig.rotateX(-ANGLE_SPEED);
+            objects[current].rotateX(-ANGLE_SPEED);
             break;
         case 's':
-            orig.rotateY(-ANGLE_SPEED);
+            objects[current].rotateY(-ANGLE_SPEED);
             break;
         case 'd':
-            orig.rotateZ(-ANGLE_SPEED);
+            objects[current].rotateZ(-ANGLE_SPEED);
             break;
             // Escalonar
         case 'f':
-            orig.scaleX(SCALE_SPEED);
+            objects[current].scaleX(SCALE_SPEED);
             break;
         case 'g':
-            orig.scaleY(SCALE_SPEED);
+            objects[current].scaleY(SCALE_SPEED);
             break;
         case 'h':
-            orig.scaleZ(SCALE_SPEED);
+            objects[current].scaleZ(SCALE_SPEED);
             break;
         case 'v':
-            orig.scaleX(1/SCALE_SPEED);
+            objects[current].scaleX(1/SCALE_SPEED);
             break;
         case 'b':
-            orig.scaleY(1/SCALE_SPEED);
+            objects[current].scaleY(1/SCALE_SPEED);
             break;
         case 'n':
-            orig.scaleZ(1/SCALE_SPEED);
+            objects[current].scaleZ(1/SCALE_SPEED);
             break;
             // Transladar
         case '8':
-            orig.transY(TRANS_SPEED);
+            objects[current].addTransY(TRANS_SPEED);
             break;
         case '2':
-            orig.transY(-TRANS_SPEED);
+            objects[current].addTransY(-TRANS_SPEED);
             break;
         case '4':
-            orig.transX(-TRANS_SPEED);
+            objects[current].addTransX(-TRANS_SPEED);
             break;
         case '6':
-            orig.transX(TRANS_SPEED);
+            objects[current].addTransX(TRANS_SPEED);
             break;
         case '1':
-            orig.transZ(TRANS_SPEED);
+            objects[current].addTransZ(TRANS_SPEED);
             break;
         case '3':
-            orig.transZ(-TRANS_SPEED);
+            objects[current].addTransZ(-TRANS_SPEED);
             break;
+        default:break;
     }
     glutPostRedisplay();
 }
