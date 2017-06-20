@@ -13,9 +13,19 @@
 
 double GTOR = PI / 180;
 
-Object3D::Object3D() {
-
-}
+//Object3D::~Object3D(){
+//    for (int i = 0; i < p; ++i)
+//        delete[] points[i];
+//    delete[] points;
+//
+//    for (int i = 0; i < l; ++i)
+//        delete[] lines[i];
+//    delete[] lines;
+//
+//    delete[] scale;
+//    delete[] ang;
+//    delete[] trans;
+//}
 
 Object3D::Object3D(int n_points, int m_lines) {
     p = n_points;
@@ -31,54 +41,38 @@ Object3D::Object3D(int n_points, int m_lines) {
 
     // Init Matriz de pontos
     points = new double *[n_points];
-    for (int i = 0; i < n_points; i++) {
+    for (int i = 0; i < n_points; i++)
         points[i] = new double[qnt_coord];
-    }
 
     // Init Matriz de linhas
     lines = new int *[m_lines];
-    for (int i = 0; i < m_lines; i++) {
+    for (int i = 0; i < m_lines; i++)
         lines[i] = new int[qnt_points];
-    }
+
 };
 
-Object3D Object3D::copyObject() {
-    Object3D copy(p,l);
-    for (size_t j = 0; j < copy.p; j++) {
+void Object3D::copyObject(Object3D *copy) {
+    copy->color = color;
+    copy->isSelected = isSelected;
+    for (size_t j = 0; j < copy->p; j++) {
         for (size_t i = 0; i < qnt_coord; i++) {
-            copy.points[j][i] = points[j][i];
+            copy->points[j][i] = points[j][i];
         }
     }
-    for (size_t j = 0; j < copy.l; j++) {
+    for (size_t j = 0; j < copy->l; j++) {
         for (size_t i = 0; i < qnt_points; i++) {
-            copy.lines[j][i] = lines[j][i];
+            copy->lines[j][i] = lines[j][i];
         }
     }
     for (int i = 0; i < 3; ++i) {
-        copy.trans[i] = trans[i];
+        copy->trans[i] = trans[i];
     }
     for (int i = 0; i < 3; ++i) {
-        copy.ang[i] = ang[i];
+        copy->ang[i] = ang[i];
     }
     for (int i = 0; i < 3; ++i) {
-        copy.scale[i] = scale[i];
+        copy->scale[i] = scale[i];
     }
-
-    return copy;
-}
-
-void Object3D::cleanObject() {
-    for (int i = 0; i < p; ++i)
-        delete[] points[i];
-    delete[] points;
-
-    for (int i = 0; i < l; ++i)
-        delete[] lines[i];
-    delete[] lines;
-
-    delete[] scale;
-    delete[] ang;
-    delete[] trans;
 }
 
 void Object3D::printObjectInfo(){
@@ -95,13 +89,17 @@ void Object3D::printObjectInfo(){
     for (int i = 0; i < 3; ++i)
         std::cout << scale[i] << " ";
     printf("\nMatriz de pontos:\n");
-    for (int i = 0; i < p; ++i)
+    for (int i = 0; i < p; ++i) {
         for (int j = 0; j < qnt_coord; ++j)
             std::cout << points[i][j] << " ";
+        std::cout << "\n";
+    }
     printf("\nMatriz de linhas:\n");
-    for (int i = 0; i < l; ++i)
+    for (int i = 0; i < l; ++i) {
         for (int j = 0; j < qnt_points; ++j)
             std::cout << lines[i][j] << " ";
+        std::cout << "\n";
+    }
 }
 
 void Object3D::makeCube() {
@@ -166,9 +164,9 @@ void Object3D::rotateY(float angle) {
 void Object3D::rotateZ(float angle) {
     ang[2] += angle;
     double rotateMtr[4][4] = {cos(angle * GTOR), sin(angle * GTOR), 0, 0,
-                             sin(angle * GTOR) * -1, cos(angle * GTOR), 0, 0,
-                             0, 0, 1, 0,
-                             0, 0, 0, 1};
+                              sin(angle * GTOR) * -1, cos(angle * GTOR), 0, 0,
+                              0, 0, 1, 0,
+                              0, 0, 0, 1};
     matrixMult(rotateMtr);
 }
 
@@ -252,35 +250,35 @@ void Object3D::moveCenter(int center){
 void Object3D::cavaleira_proj() {
     float alfa = 0.707;
     double cavMtr[4][4] = {1, 0, 0, 0,
-                          0, 1, 0, 0,
-                          alfa, alfa, 0, 0,
-                          0, 0, 0, 1};
+                           0, 1, 0, 0,
+                           alfa, alfa, 0, 0,
+                           0, 0, 0, 1};
     matrixMult(cavMtr);
 }
 
 void Object3D::cabinet_proj() {
     double alfa = 0.707 / 2;
     double cabMtr[4][4] = {1, 0, 0, 0,
-                          0, 1, 0, 0,
-                          alfa, alfa, 0, 0,
-                          0, 0, 0, 1};
+                           0, 1, 0, 0,
+                           alfa, alfa, 0, 0,
+                           0, 0, 0, 1};
     matrixMult(cabMtr);
 }
 
 void Object3D::orto_proj() {
     double ortoMtr[4][4] = {1, 0, 0, 0,
-                           0, 1, 0, 0,
-                           0, 0, 0, 0,
-                           0, 0, 0, 1};
+                            0, 1, 0, 0,
+                            0, 0, 0, 0,
+                            0, 0, 0, 1};
     matrixMult(ortoMtr);
 }
 
 void Object3D::persp1_proj() {
     double fz = -100.0;
     double perspMtr[4][4] = {1, 0, 0, 0,
-                            0, 1, 0, 0,
-                            0, 0, 1, -1 / fz,
-                            0, 0, 0, 1};
+                             0, 1, 0, 0,
+                             0, 0, 1, -1 / fz,
+                             0, 0, 0, 1};
     matrixMult(perspMtr);
 }
 
@@ -288,9 +286,9 @@ void Object3D::persp2_proj() {
     double fz = -100.0;
     double fx = -100.0;
     double perspMtr[4][4] = {1, 0, 0, -1 / fx,
-                            0, 1, 0, 0,
-                            0, 0, 1, -1 / fz,
-                            0, 0, 0, 1};
+                             0, 1, 0, 0,
+                             0, 0, 1, -1 / fz,
+                             0, 0, 0, 1};
     matrixMult(perspMtr);
 }
 
@@ -301,7 +299,7 @@ void Object3D::showLinesCube(){
         y1 = (points[ lines[j][0] ][1])/points[ lines[j][0] ][3];
         x2 = (points[ lines[j][1] ][0])/points[ lines[j][1] ][3];
         y2 = (points[ lines[j][1] ][1])/points[ lines[j][1] ][3];
-        Window::createLine(x1,y1,x2,y2);
+        Window::createLine(x1, y1, x2, y2, isSelected, color);
     }
 }
 
