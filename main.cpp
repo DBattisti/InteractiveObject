@@ -25,13 +25,16 @@ enum MENU_TYPE {
 };
 
 int trans_type;
-std::list<Object3D>::iterator selected;
+list<Object3D>::iterator selected;
+list<string>::iterator listMenuSelected;
 
 int funcProj;
 int win, main_menu, proj_menu;
 int current;
 
 std::list<Object3D> objects;
+list<string> listMenu, listSubMenu;
+void initListMenu();
 
 void setup() {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -40,9 +43,25 @@ void setup() {
     IOObjects::read(objects);
     selected = objects.begin();
 
+    initListMenu ();
+    listMenuSelected = listMenu.begin();
+
     current = 0;
     trans_type = 3;
     funcProj = MENU_CAVALEIRA;
+}
+
+void initListMenu() {
+    listMenu.push_back("Projecoes");
+    listMenu.push_back("Mostrar inf.");
+    listMenu.push_back("Limpar");
+    listMenu.push_back("Sair");
+    listMenu.push_back("Voltar");
+
+    listSubMenu.push_back("Cavaleira");
+    listSubMenu.push_back("Cabinet");
+    listSubMenu.push_back("Ponto de fuga X");
+    listSubMenu.push_back("Ponto de fuga X e Y");
 }
 
 void proj(Object3D &orig) {
@@ -74,18 +93,40 @@ void proj(Object3D &orig) {
     copy.showLinesCube();
 }
 
+void printText (string s, int x, int y, int cor){
+    switch (cor){
+        case 0:
+            glColor3f(0,0,0);
+            break;
+        case 1:
+            glColor3f(1,0,0);
+        default:
+            break;
+    }
+    glRasterPos2i(x, y);
+    void *font = GLUT_BITMAP_9_BY_15;
+    for (std::string::iterator i = s.begin(); i != s.end(); ++i) {
+        char c = *i;
+        glutBitmapCharacter(font, c);
+    }
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0f, 0.0f, 0.0f);
 
     if (selected == objects.end())
         selected = objects.begin();
+    if (listMenuSelected == listMenu.end())
+        listMenuSelected = listMenu.begin();
+
     selected->isSelected = true;
 
     for (list<Object3D>::iterator it = objects.begin(); it != objects.end(); it++)
         proj(*it);
 
     std::string s;
+    int count = 100;
     switch (trans_type) {
         case 0:
             s = "TRANSLACAO";
@@ -99,19 +140,26 @@ void display() {
         case 3:
             s = "SELECIONE";
             break;
+        case 4:
+            s = "MENU";
+            for (list<string>::iterator it = listMenu.begin(); it!=listMenu.end(); it++) {
+                if (*it == *listMenuSelected) {
+                    printText(*it, 650, count -= 15, 1);
+                }else{
+                    printText(*it, 650, count -= 15, 0);
+                }
+            }
+            break;
         default:
             s = "default";
     }
-    glRasterPos2i(10, 10);
-    void *font = GLUT_BITMAP_9_BY_15;
-    for (std::string::iterator i = s.begin(); i != s.end(); ++i) {
-        char c = *i;
-        glutBitmapCharacter(font, c);
-    }
+    printText(s,10,10,0);
 
 
     glutSwapBuffers();
 }
+
+
 
 void projChoose(int item_proj) {
     funcProj = item_proj;
@@ -135,6 +183,7 @@ void choose(int item_menu) {
 }
 
 void transformations(unsigned char key, int x, int y) {
+//    cout << x << " " << y << endl;
     switch (key) {
         case 'q':
             current++;

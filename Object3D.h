@@ -26,7 +26,7 @@ public:
     void printObjectInfo();
     void copyObject(Object3D *copy);
     void matrixMult (double (*mtr)[4]);
-    void rotateX(float angle);
+    void rotateX(double angle);
     void rotateY(float angle);
     void rotateZ(float angle);
     void scaleX(double scale);

@@ -9,6 +9,7 @@ using namespace std;
 
 extern int trans_type;
 extern list<Object3D>::iterator selected;
+extern list<string>::iterator listMenuSelected;
 
 int PT = 2;
 int PR = 50;
@@ -28,11 +29,19 @@ void LeapListener::onFrame(const Controller &controller) {
         for (int i = 0; i < gestures.count(); i++) {
             switch (gestures[i].type()) {
                 case Gesture::TYPE_SWIPE:
-                    selected->isSelected = false;
-                    selected++;
+                    switch (trans_type) {
+                        case 4:
+                            listMenuSelected++;
+                            break;
+                        case 3:
+                            selected->isSelected = false;
+                            selected++;
+                        default:
+                            break;
+                    }
                     break;
                 case Gesture::TYPE_KEY_TAP:
-                    trans_type = (trans_type + 1) % 4;
+                    trans_type = (trans_type + 1) % 5;
                     break;
                 case Gesture::TYPE_INVALID:
                     break;
@@ -41,8 +50,8 @@ void LeapListener::onFrame(const Controller &controller) {
                 case Gesture::TYPE_SCREEN_TAP:
                     break;
             }
-        }
 
+        }
     }
 
     Leap::HandList handsInFrame = frame.hands();

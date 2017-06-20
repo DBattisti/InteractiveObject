@@ -143,7 +143,7 @@ void Object3D::matrixMult(double (*mtr)[4]) {
     }
 }
 
-void Object3D::rotateX(float angle) {
+void Object3D::rotateX(double angle) {
     ang[0] += angle;
     double rotateMtr[4][4] = {1, 0, 0, 0,
                               0, cos(angle * GTOR), sin(angle * GTOR), 0,
