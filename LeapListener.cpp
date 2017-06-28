@@ -101,7 +101,6 @@ void LeapListener::onFrame(const Controller &controller) {
     Leap::HandList handsInFrame = frame.hands();
     if (!handsInFrame.isEmpty()) {
         Leap::Hand hand = handsInFrame.rightmost();
-        cout << hand.fingers().count() << endl;
         switch (current_option) {
             case Op::OPTION_TRAN: {
                 Leap::Vector linearMovement = hand.translation(previous);
