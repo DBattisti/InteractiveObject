@@ -61,6 +61,7 @@ void IOObjects::store(list <Object3D>& objectsSelected) {
 
 void IOObjects::read(list<Object3D>&objects) {
     string line;
+    objects.clear();
     ifstream myfile ("../figure.dat");
     int n;
     if (myfile.is_open()){

@@ -5,6 +5,8 @@
 #include "Object3D.h"
 #include "LeapListener.h"
 #include "IOObjects.h"
+#include "Op.h"
+#include "main.h"
 
 #define ANGLE_SPEED 5
 #define SCALE_SPEED 1.1
@@ -13,24 +15,17 @@
 #define HEIGHT 600
 
 using namespace std;
-enum MENU_TYPE {
-    MENU_EXIT,
-    MENU_CLEAN,
-    MENU_PRINT,
-    MENU_ORTO,
-    MENU_CAVALEIRA,
-    MENU_CABINET,
-    MENU_PERSP1,
-    MENU_PERSP2
-};
 
-int trans_type;
-list<Object3D>::iterator selected;
-list<string>::iterator listMenuSelected;
 
+Op current_option;
+
+list<Object3D>::iterator current_object;
+list<string>::iterator current_menu_option;
+list<string>::iterator current_submenu_option;
+
+int64_t last_gesture_time;
+bool isSubMenu;
 int funcProj;
-int win, main_menu, proj_menu;
-int current;
 
 std::list<Object3D> objects;
 list<string> listMenu, listSubMenu;
@@ -41,27 +36,32 @@ void setup() {
     gluOrtho2D(0, WIDTH - 1, 0, HEIGHT - 1);
 
     IOObjects::read(objects);
-    selected = objects.begin();
+    current_object = objects.begin();
 
     initListMenu ();
-    listMenuSelected = listMenu.begin();
+    current_menu_option = listMenu.begin();
+    current_submenu_option = listSubMenu.begin();
 
-    current = 0;
-    trans_type = 3;
+    last_gesture_time = 0;
+    isSubMenu = false;
+    current_option = Op::OPTION_MENU;
     funcProj = MENU_CAVALEIRA;
 }
 
 void initListMenu() {
+    listMenu.clear();
     listMenu.push_back("Projecoes");
     listMenu.push_back("Mostrar inf.");
     listMenu.push_back("Limpar");
-    listMenu.push_back("Sair");
-    listMenu.push_back("Voltar");
+    listMenu.push_back("Sair do menu");
+    listMenu.push_back("Fechar Programa");
 
+    listSubMenu.clear();
     listSubMenu.push_back("Cavaleira");
     listSubMenu.push_back("Cabinet");
     listSubMenu.push_back("Ponto de fuga X");
     listSubMenu.push_back("Ponto de fuga X e Y");
+    listSubMenu.push_back("Voltar");
 }
 
 void proj(Object3D &orig) {
@@ -115,139 +115,63 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0f, 0.0f, 0.0f);
 
-    if (selected == objects.end())
-        selected = objects.begin();
-    if (listMenuSelected == listMenu.end())
-        listMenuSelected = listMenu.begin();
+    if (current_object == objects.end())
+        current_object = objects.begin();
+    if (current_menu_option == listMenu.end())
+        current_menu_option = listMenu.begin();
+    if (current_submenu_option == listSubMenu.end())
+        current_submenu_option = listSubMenu.begin();
 
-    selected->isSelected = true;
+    current_object->isSelected = true;
 
     for (list<Object3D>::iterator it = objects.begin(); it != objects.end(); it++)
         proj(*it);
 
     std::string s;
     int count = 100;
-    switch (trans_type) {
-        case 0:
+    switch (current_option) {
+        case Op::OPTION_TRAN:
             s = "TRANSLACAO";
             break;
-        case 1:
+        case Op::OPTION_ROT:
             s = "ROTACAO";
             break;
-        case 2:
+        case Op::OPTION_SCA:
             s = "ESCALA";
             break;
-        case 3:
+        case Op::OPTION_SELECTION:
             s = "SELECIONE";
             break;
-        case 4:
+        case Op::OPTION_MENU:
             s = "MENU";
             for (list<string>::iterator it = listMenu.begin(); it!=listMenu.end(); it++) {
-                if (*it == *listMenuSelected) {
+                if (*it == *current_menu_option) {
                     printText(*it, 650, count -= 15, 1);
                 }else{
                     printText(*it, 650, count -= 15, 0);
                 }
             }
             break;
-        default:
-            s = "default";
     }
     printText(s,10,10,0);
+
+    if (isSubMenu){
+        count = 100;
+        for (list<string>::iterator it = listSubMenu.begin(); it!=listSubMenu.end(); it++) {
+            if (*it == *current_submenu_option) {
+                printText(*it, 450, count -= 15, 1);
+            }else{
+                printText(*it, 450, count -= 15, 0);
+            }
+        }
+    }
 
 
     glutSwapBuffers();
 }
 
-
-
 void projChoose(int item_proj) {
     funcProj = item_proj;
-    glutPostRedisplay();
-}
-
-void choose(int item_menu) {
-    switch (item_menu) {
-        case MENU_EXIT:
-            glutDestroyWindow(win);
-            break;
-        case MENU_CLEAN:
-            glutPostRedisplay();
-            break;
-        case MENU_PRINT:
-            objects.front().printObjectInfo();
-            break;
-        default:
-            printf("Invalid menu item:%d\n", item_menu);
-    }
-}
-
-void transformations(unsigned char key, int x, int y) {
-//    cout << x << " " << y << endl;
-    switch (key) {
-        case 'q':
-            current++;
-            current %= 5;
-            // Rotacionar
-        case 'z':
-            objects.front().rotateX(ANGLE_SPEED);
-            break;
-        case 'x':
-            objects.front().rotateY(ANGLE_SPEED);
-            break;
-        case 'c':
-            objects.front().rotateZ(ANGLE_SPEED);
-            break;
-        case 'a':
-            objects.front().rotateX(-ANGLE_SPEED);
-            break;
-        case 's':
-            objects.front().rotateY(-ANGLE_SPEED);
-            break;
-        case 'd':
-            objects.front().rotateZ(-ANGLE_SPEED);
-            break;
-            // Escalonar
-        case 'f':
-            objects.front().scaleX(SCALE_SPEED);
-            break;
-        case 'g':
-            objects.front().scaleY(SCALE_SPEED);
-            break;
-        case 'h':
-            objects.front().scaleZ(SCALE_SPEED);
-            break;
-        case 'v':
-            objects.front().scaleX(1 / SCALE_SPEED);
-            break;
-        case 'b':
-            objects.front().scaleY(1 / SCALE_SPEED);
-            break;
-        case 'n':
-            objects.front().scaleZ(1 / SCALE_SPEED);
-            break;
-            // Transladar
-        case '8':
-            objects.front().addTransY(TRANS_SPEED);
-            break;
-        case '2':
-            objects.front().addTransY(-TRANS_SPEED);
-            break;
-        case '4':
-            objects.front().addTransX(-TRANS_SPEED);
-            break;
-        case '6':
-            objects.front().addTransX(TRANS_SPEED);
-            break;
-        case '1':
-            objects.front().addTransZ(TRANS_SPEED);
-            break;
-        case '3':
-            objects.front().addTransZ(-TRANS_SPEED);
-            break;
-        default:
-            break;
-    }
     glutPostRedisplay();
 }
 
@@ -260,23 +184,7 @@ int main(int argc, char *argv[]) {
     glutInitDisplayMode(GLUT_DOUBLE);
     glutInitWindowSize(WIDTH, HEIGHT);
 
-    win = glutCreateWindow("Criacao de objetos 3D");
-
-    proj_menu = glutCreateMenu(projChoose);
-    glutAddMenuEntry("Paralela Ortografica Multiplas Vistas", MENU_ORTO);
-    glutAddMenuEntry("Paralela Obliqua Cavaleira", MENU_CAVALEIRA);
-    glutAddMenuEntry("Paralela Obliqua Cabinet", MENU_CABINET);
-    glutAddMenuEntry("Perspectiva com um ponto de fuga em Z", MENU_PERSP1);
-    glutAddMenuEntry("Perspectiva com dois pontos de fuga, em X e Z", MENU_PERSP2);
-
-    main_menu = glutCreateMenu(choose);
-    glutAddSubMenu("Projecoes", proj_menu);
-    glutAddMenuEntry("Info", MENU_PRINT);
-    glutAddMenuEntry("Refresh", MENU_CLEAN);
-    glutAddMenuEntry("Sair", MENU_EXIT);
-
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-    glutKeyboardFunc(transformations);
+    glutCreateWindow("Transformacoes de objetos 3D usando Leap Motion");
 
     setup();
     glutDisplayFunc(display);
