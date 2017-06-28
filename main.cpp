@@ -8,9 +8,6 @@
 #include "Op.h"
 #include "main.h"
 
-#define ANGLE_SPEED 5
-#define SCALE_SPEED 1.1
-#define TRANS_SPEED 5
 #define WIDTH 800
 #define HEIGHT 600
 
@@ -168,11 +165,6 @@ void display() {
 
 
     glutSwapBuffers();
-}
-
-void projChoose(int item_proj) {
-    funcProj = item_proj;
-    glutPostRedisplay();
 }
 
 void idle(void) {

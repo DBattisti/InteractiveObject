@@ -76,7 +76,7 @@ void LeapListener::onFrame(const Controller &controller) {
                             if (*current_menu_option == "Projecoes") {
                                 isSubMenu = true;
                             } else if (*current_menu_option == "Mostrar inf.") {
-
+                                current_object->printObjectInfo();
                             } else if (*current_menu_option == "Limpar") {
                                 setup();
                             } else if (*current_menu_option == "Fechar Programa") {
