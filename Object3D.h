@@ -32,11 +32,11 @@ public:
     void scaleX(double scale);
     void scaleY(double scale);
     void scaleZ(double scale);
-    void transX(int trans);
-    void transY(int trans);
-    void transZ(int trans);
+    void transX(double trans);
+    void transY(double trans);
+    void transZ(double trans);
     void scaleObject(float scale);
-    void moveCenter(int center);
+    void moveCenter(double center);
     void cavaleira_proj ();
     void cabinet_proj ();
     void orto_proj ();

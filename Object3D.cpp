@@ -13,20 +13,6 @@
 
 double GTOR = PI / 180;
 
-//Object3D::~Object3D(){
-//    for (int i = 0; i < p; ++i)
-//        delete[] points[i];
-//    delete[] points;
-//
-//    for (int i = 0; i < l; ++i)
-//        delete[] lines[i];
-//    delete[] lines;
-//
-//    delete[] scale;
-//    delete[] ang;
-//    delete[] trans;
-//}
-
 Object3D::Object3D(int n_points, int m_lines) {
     p = n_points;
     l = m_lines;
@@ -100,33 +86,6 @@ void Object3D::printObjectInfo(){
             std::cout << lines[i][j] << " ";
         std::cout << "\n";
     }
-}
-
-void Object3D::makeCube() {
-    points[0][0] =  1.0; points[0][1] =  1.0; points[0][2] =  1.0; points[0][3] = 1.0;//p3
-    points[1][0] =  1.0; points[1][1] =  1.0; points[1][2] = -1.0; points[1][3] = 1.0;//p6
-    points[2][0] =  1.0; points[2][1] = -1.0; points[2][2] =  1.0; points[2][3] = 1.0;//p2
-    points[3][0] =  1.0; points[3][1] = -1.0; points[3][2] = -1.0; points[3][3] = 1.0;//p7
-    points[4][0] = -1.0; points[4][1] =  1.0; points[4][2] =  1.0; points[4][3] = 1.0;//p4
-    points[5][0] = -1.0; points[5][1] =  1.0; points[5][2] = -1.0; points[5][3] = 1.0;//p5
-    points[6][0] = -1.0; points[6][1] = -1.0; points[6][2] =  1.0; points[6][3] = 1.0;//p1
-    points[7][0] = -1.0; points[7][1] = -1.0; points[7][2] = -1.0; points[7][3] = 1.0;//p8
-
-    //face frente
-    lines [0][0] = 6; lines [0][1] = 2;
-    lines [1][0] = 2; lines [1][1] = 0;
-    lines [2][0] = 0; lines [2][1] = 4;
-    lines [3][0] = 4; lines [3][1] = 6;
-    //face tras
-    lines [4][0] = 5; lines [4][1] = 1;
-    lines [5][0] = 1; lines [5][1] = 3;
-    lines [6][0] = 3; lines [6][1] = 7;
-    lines [7][0] = 7; lines [7][1] = 5;
-    //interligações
-    lines [8][0] = 4; lines [8][1] = 5;
-    lines [9][0] = 0; lines [9][1] = 1;
-    lines[10][0] = 2; lines[10][1] = 3;
-    lines[11][0] = 6; lines[11][1] = 7;
 }
 
 void Object3D::matrixMult(double (*mtr)[4]) {
@@ -209,7 +168,7 @@ void Object3D::addTransZ(int i) {
     this->trans[2] += i;
 }
 
-void Object3D::transX(int trans) {
+void Object3D::transX(double trans) {
     trans += this->trans[0];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
@@ -218,7 +177,7 @@ void Object3D::transX(int trans) {
     matrixMult(transMtr);
 }
 
-void Object3D::transY(int trans) {
+void Object3D::transY(double trans) {
     trans += this->trans[1];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
@@ -227,7 +186,7 @@ void Object3D::transY(int trans) {
     matrixMult(transMtr);
 }
 
-void Object3D::transZ(int trans) {
+void Object3D::transZ(double trans) {
     trans += this->trans[2];
     double transMtr[4][4] = {1, 0, 0, 0,
                              0, 1, 0, 0,
@@ -236,13 +195,7 @@ void Object3D::transZ(int trans) {
     matrixMult(transMtr);
 }
 
-void Object3D::scaleObject(float scale){
-    scaleX(scale);
-    scaleY(scale);
-    scaleZ(scale);
-}
-
-void Object3D::moveCenter(int center){
+void Object3D::moveCenter(double center){
     transX(center);
     transY(center);
 }
